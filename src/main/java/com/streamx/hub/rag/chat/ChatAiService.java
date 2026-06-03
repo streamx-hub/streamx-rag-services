@@ -1,14 +1,17 @@
 package com.streamx.hub.rag.chat;
 
+import com.streamx.hub.rag.chat.dto.ProductResponse;
+import com.streamx.hub.rag.chat.guardrail.ProductOutputGuardrail;
 import com.streamx.hub.rag.retrieval.RagRetrievalAugmentorSupplier;
 import dev.langchain4j.service.MemoryId;
 import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;
 import dev.langchain4j.service.V;
+import dev.langchain4j.service.guardrail.OutputGuardrails;
 import io.quarkiverse.langchain4j.RegisterAiService;
-import io.smallrye.mutiny.Multi;
 
 @RegisterAiService(retrievalAugmentor = RagRetrievalAugmentorSupplier.class)
+@OutputGuardrails(ProductOutputGuardrail.class)
 public interface ChatAiService {
 
   /**
@@ -23,7 +26,7 @@ public interface ChatAiService {
    */
   @SystemMessage("{systemPrompt}")
   @UserMessage("{question}")
-  Multi<String> chat(@MemoryId String sessionId,
+  ProductResponse chat(@MemoryId String sessionId,
       @V("systemPrompt") String systemPrompt,
       @V("question") String question);
 }
