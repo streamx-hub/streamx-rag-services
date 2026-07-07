@@ -1,5 +1,7 @@
 package com.streamx.hub.rag.chat.guardrail;
 
+import static com.streamx.hub.rag.utils.RagUtils.stripMarkdown;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.langchain4j.data.message.AiMessage;
@@ -9,9 +11,9 @@ import jakarta.enterprise.context.ApplicationScoped;
 import org.jboss.logging.Logger;
 
 @ApplicationScoped
-public class ProductOutputGuardrail implements OutputGuardrail {
+public class CustomOutputGuardrail implements OutputGuardrail {
 
-  private static final Logger LOG = Logger.getLogger(ProductOutputGuardrail.class);
+  private static final Logger LOG = Logger.getLogger(CustomOutputGuardrail.class);
   private final ObjectMapper mapper = new ObjectMapper();
 
   @Override
@@ -27,12 +29,5 @@ public class ProductOutputGuardrail implements OutputGuardrail {
       );
       return reprompt("Invalid JSON format", correctionInstruction);
     }
-  }
-
-  private static String stripMarkdown(String responseFromLlmText) {
-    return responseFromLlmText
-        .replace("```json", "")
-        .replace("```", "")
-        .trim();
   }
 }
