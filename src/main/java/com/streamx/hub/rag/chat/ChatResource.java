@@ -16,10 +16,9 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import java.util.UUID;
 import org.jboss.logging.Logger;
-import org.jboss.resteasy.reactive.RestStreamElementType;
 
 /**
- * Chat endpoint. Streams GPT-4o responses token by token.
+ * Chat endpoint. Outputs GPT-4o responses in form of a JSON.
  *
  * <p>Callers may optionally pass a {@code profileName} in the request body to
  * select a specific business use-case configuration. Omitting it (or sending {@code "default"})
@@ -60,8 +59,7 @@ public class ChatResource {
   @POST
   @Blocking
   @Consumes(MediaType.APPLICATION_JSON)
-  @Produces(MediaType.SERVER_SENT_EVENTS)
-  @RestStreamElementType(MediaType.TEXT_PLAIN)
+  @Produces(MediaType.APPLICATION_JSON)
   public JsonNode chat(ChatRequest request) {
     if (request == null || request.question() == null || request.question().isBlank()) {
       return mapper.createObjectNode().put("message", "Please enter a question.");
