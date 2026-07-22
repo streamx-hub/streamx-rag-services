@@ -5,7 +5,13 @@
   <groupId>com.streamx.hub</groupId>
   <artifactId>streamx-rag-service</artifactId>
   <version>1.0.2-SNAPSHOT</version>
+  <packaging>pom</packaging>
   <name>StreamX RAG : Project</name>
+
+  <modules>
+    <module>streamx-rag-edge-service</module>
+    <module>streamx-rag-processing-service</module>
+  </modules>
 
   <scm>
     <connection>scm:git:git@github.com:streamx-hub/streamx-rag-edge-service.git</connection>
@@ -131,20 +137,6 @@
         <artifactId>rocksdbjni</artifactId>
         <version>${rocks-db.version}</version>
       </dependency>
-
-      <!-- Test dependencies -->
-      <dependency>
-        <groupId>org.assertj</groupId>
-        <artifactId>assertj-core</artifactId>
-        <version>${assertj-core.version}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>io.quarkiverse.wiremock</groupId>
-        <artifactId>quarkus-wiremock-test</artifactId>
-        <version>${quarkus-wiremock-test.version}</version>
-        <scope>test</scope>
-      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -195,13 +187,39 @@
       <scope>runtime</scope>
     </dependency>
 
-    <!-- Datasource for pgvector -->
+    <!-- Test dependencies -->
+    <dependency>
+      <groupId>io.smallrye.reactive</groupId>
+      <artifactId>smallrye-reactive-messaging-in-memory</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <version>${assertj-core.version}</version>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-jdbc-postgresql</artifactId>
+      <artifactId>quarkus-junit-mockito</artifactId>
+      <scope>test</scope>
     </dependency>
-
-    <!-- Hibernate ORM + Panache for chat profile management -->
+    <dependency>
+      <groupId>org.awaitility</groupId>
+      <artifactId>awaitility</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkiverse.wiremock</groupId>
+      <artifactId>quarkus-wiremock-test</artifactId>
+      <version>${quarkus-wiremock-test.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>testcontainers</artifactId>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-hibernate-orm-panache</artifactId>
