@@ -1,21 +1,23 @@
 package com.streamx.hub.rag;
 
 import io.smallrye.config.ConfigMapping;
-import java.util.Optional;
+import io.smallrye.config.WithDefault;
 import java.util.Set;
 
 @ConfigMapping(prefix = "streamx.hub.openai-rag-sink")
 public interface Configuration {
 
-  Optional<String> defaultNamespace();
+  @WithDefault("")
+  String defaultNamespace();
 
-  Optional<Set<String>> htmlResourceTypes();
+  @WithDefault("")
+  Set<String> htmlResourceTypes();
 
   ChatProfile chatProfile();
 
   interface ChatProfile {
 
-    Optional<String> name();
+    String name();
 
     String displayName();
 

@@ -3,6 +3,8 @@ package com.streamx.hub.rag.data;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.streamx.blueprints.data.Resource;
+import com.streamx.blueprints.data.Typed;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
@@ -13,7 +15,7 @@ public class ResourceTest {
 
   @Test
   void verifyReflectConfigJson() {
-    assertThat(com.streamx.hub.rag.data.Resource.class)
+    assertThat(Resource.class)
         .hasAnnotation(RegisterForReflection.class);
   }
 

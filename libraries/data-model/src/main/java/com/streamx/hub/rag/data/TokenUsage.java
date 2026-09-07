@@ -1,11 +1,12 @@
-package com.streamx.hub.rag.embed.data;
+package com.streamx.hub.rag.data;
 
-import dev.langchain4j.model.output.TokenUsage;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 
-public record SerializableTokenUsage(Integer inputTokenCount, Integer outputTokenCount,
-                                     Integer totalTokenCount) {
+@RegisterForReflection
+public record TokenUsage(Integer inputTokenCount, Integer outputTokenCount,
+                         Integer totalTokenCount) {
 
-  public SerializableTokenUsage(TokenUsage tokenUsage) {
+  public TokenUsage(dev.langchain4j.model.output.TokenUsage tokenUsage) {
     this(tokenUsage != null ? valueOrDefault(tokenUsage.inputTokenCount()) : -1,
         tokenUsage != null ? valueOrDefault(tokenUsage.outputTokenCount()) : -1,
         tokenUsage != null ? valueOrDefault(tokenUsage.totalTokenCount()) : -1);
@@ -15,3 +16,4 @@ public record SerializableTokenUsage(Integer inputTokenCount, Integer outputToke
     return value != null ? value : -1;
   }
 }
+

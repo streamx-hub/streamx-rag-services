@@ -7,20 +7,14 @@
     <groupId>com.streamx.hub</groupId>
     <artifactId>streamx-rag-service</artifactId>
     <version>1.0.2-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>streamx-rag-processing-service</artifactId>
-  <name>StreamX RAG : Processing</name>
+  <artifactId>libraries</artifactId>
+  <name>StreamX RAG : Libraries</name>
+  <packaging>pom</packaging>
 
-  <dependencies>
-    <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-container-image-docker</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.streamx.hub</groupId>
-      <artifactId>data-model</artifactId>
-    </dependency>
-  </dependencies>
+  <modules>
+    <module>data-model</module>
+  </modules>
+
 </project>

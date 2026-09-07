@@ -8,10 +8,9 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.transaction.Transactional.TxType;
-import java.time.Instant;
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import org.jboss.logging.Logger;
-import org.jspecify.annotations.NonNull;
 
 /**
  * Business logic for managing chat profiles.
@@ -64,61 +63,53 @@ public class ChatProfileService {
    *                               (should never happen after seed)
    */
   @Transactional(TxType.SUPPORTS)
-  public ChatProfile resolveOrDefault(String profileName) {
-    Configuration.ChatProfile envChatProfile = config.chatProfile();
-    String name = getName(profileName, envChatProfile);
-
-    ChatProfile cached = profileCache.getCachedProfile(name);
-    if (cached != null) {
-      return cached;
+  public ChatProfile getProfileOrDefault(String profileName) {
+    if (StringUtils.isNotBlank(profileName)) {
+      ChatProfile cached = profileCache.getCachedProfile(profileName);
+      if (cached != null) {
+        return cached;
+      }
     }
 
-    ChatProfile profile = getEnvironmentProfile(name, envChatProfile);
+    ChatProfile profile = getProfile(config.chatProfile());
     if (profile != null) {
       return profile;
     }
-    return getDatabaseProfile(name);
+    return getPersistedProfile(profileName);
   }
 
-  private ChatProfile getEnvironmentProfile(String name,
-      Configuration.ChatProfile env) {
-    if (env.name().isEmpty() || !env.active()) {
+  private ChatProfile getProfile(Configuration.ChatProfile config) {
+    if (config.name().isEmpty() || !config.active()) {
       return null;
     }
 
+    String name = config.name();
     ChatProfile profile = ChatProfile.create(
-        env.name().get(),
-        env.displayName(),
-        env.systemPrompt());
+        name,
+        config.displayName(),
+        config.systemPrompt());
 
     profileCache.put(name, profile);
     return profile;
   }
 
-  private ChatProfile getDatabaseProfile(String name) {
+  private ChatProfile getPersistedProfile(String name) {
     ChatProfile profile = ChatProfile.findByName(name);
 
     if (profile == null) {
-      LOG.warnf("Profile '%s' not found — falling back to default", name);
+      LOG.debugf("Profile '%s' not found — falling back to default", name);
       profile = ChatProfile.findByName(DEFAULT_PROFILE_NAME);
     }
     if (profile == null) {
       throw new IllegalStateException("Default chat profile missing — run seed");
     }
     if (!profile.active) {
-      LOG.warnf("Profile '%s' is inactive — falling back to default", name);
+      LOG.debugf("Profile '%s' is inactive — falling back to default", name);
       profile = ChatProfile.findByName(DEFAULT_PROFILE_NAME);
     }
 
     profileCache.put(name, profile);
     return profile;
-  }
-
-  private static @NonNull String getName(String profileName,
-      Configuration.ChatProfile envChatProfile) {
-    return (profileName == null || profileName.isBlank())
-        ? envChatProfile.name().orElse(DEFAULT_PROFILE_NAME)
-        : profileName.trim();
   }
 
   @Transactional(TxType.SUPPORTS)
@@ -129,36 +120,5 @@ public class ChatProfileService {
   @Transactional(TxType.SUPPORTS)
   public ChatProfile findByName(String name) {
     return ChatProfile.findByName(name);
-  }
-
-  @Transactional
-  public ChatProfile create(ChatProfileRequest req) {
-    if (ChatProfile.existsByName(req.name())) {
-      throw new IllegalArgumentException("Profile with name '" + req.name() + "' already exists");
-    }
-    ChatProfile profile = new ChatProfile();
-    profile.name = req.name().trim();   // name is set only here, never via applyRequest
-    applyRequest(profile, req);
-    profile.createdAt = Instant.now();
-    profile.persist();
-    profileCache.invalidateCache();
-    LOG.infof("Created chat profile: %s", profile.name);
-    return profile;
-  }
-
-  /**
-   * Applies mutable fields from the request onto the profile entity.
-   *
-   * <p>{@code name} is intentionally excluded — it is the resource identifier
-   * (the URL path parameter) and must never be changed via an update request. Changing the name
-   * would silently break all callers referencing the old name.
-   */
-  private void applyRequest(ChatProfile p, ChatProfileRequest req) {
-    p.setDisplayName(req.displayName());
-    p.setSystemPrompt(req.systemPrompt());
-    p.setMaxResults(req.maxResults());
-    p.setMinScore(req.minScore());
-    p.setTopicBlocklist(req.topicBlocklist());
-    p.setActive(req.active());
   }
 }

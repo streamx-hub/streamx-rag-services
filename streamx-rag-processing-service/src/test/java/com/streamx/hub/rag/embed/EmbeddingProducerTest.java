@@ -6,10 +6,10 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.streamx.hub.rag.embed.data.Data;
-import com.streamx.hub.rag.embed.data.EmbeddingBatch;
-import com.streamx.hub.rag.embed.data.Resource;
-import com.streamx.hub.rag.embed.utils.CloudEventUtils;
+import com.streamx.blueprints.data.Data;
+import com.streamx.blueprints.data.Resource;
+import com.streamx.hub.rag.data.EmbeddingBatch;
+import com.streamx.hub.rag.utils.CloudEventUtils;
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.output.Response;
@@ -94,7 +94,7 @@ class EmbeddingProducerTest {
 
     EmbeddingBatch embeddingBatch = getEmbeddingBatch(resultEvent);
     assertThat(embeddingBatch.vectors()).hasSize(1);
-    assertThat(embeddingBatch.serializableTokenUsage().totalTokenCount()).isEqualTo(-1);
+    assertThat(embeddingBatch.tokenUsage().totalTokenCount()).isEqualTo(-1);
     assertThat(embeddingBatch.embedded().get(1).toString()).contains(
         "\"discountedValue\": \"8.52\"\n}\n}");
   }

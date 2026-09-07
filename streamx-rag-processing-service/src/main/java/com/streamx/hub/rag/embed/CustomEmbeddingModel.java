@@ -1,12 +1,11 @@
 package com.streamx.hub.rag.embed;
 
-import com.streamx.hub.rag.embed.data.EmbeddingBatch;
-import com.streamx.hub.rag.embed.data.SerializableTextSegment;
-import com.streamx.hub.rag.embed.data.SerializableTokenUsage;
+import com.streamx.hub.rag.data.EmbeddingBatch;
+import com.streamx.hub.rag.data.TextSegment;
+import com.streamx.hub.rag.data.TokenUsage;
 import dev.langchain4j.data.document.Document;
 import dev.langchain4j.data.document.DocumentSplitter;
 import dev.langchain4j.data.embedding.Embedding;
-import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.internal.Utils;
 import dev.langchain4j.internal.ValidationUtils;
 import dev.langchain4j.model.embedding.EmbeddingModel;
@@ -39,7 +38,7 @@ public class CustomEmbeddingModel {
     if (factories.size() > 1) {
       throw new RuntimeException(
           "Conflict: multiple document splitters have been found in the classpath. "
-              + "Please explicitly specify the one you wish to use.");
+          + "Please explicitly specify the one you wish to use.");
     } else {
       return factories.stream()
           .findFirst()
@@ -58,7 +57,7 @@ public class CustomEmbeddingModel {
     if (factories.size() > 1) {
       throw new RuntimeException(
           "Conflict: multiple embedding models have been found in the classpath. "
-              + "Please explicitly specify the one you wish to use.");
+          + "Please explicitly specify the one you wish to use.");
     } else {
       return factories.stream()
           .findFirst()
@@ -77,7 +76,7 @@ public class CustomEmbeddingModel {
 
   public EmbeddingBatch embed(List<Document> documents) {
     log.debugf("Starting to ingest %s documents", documents.size());
-    List<TextSegment> segments;
+    List<dev.langchain4j.data.segment.TextSegment> segments;
     if (this.documentSplitter != null) {
       segments = this.documentSplitter.splitAll(documents);
       log.debugf("Documents were split into %s text segments", segments.size());
@@ -90,12 +89,13 @@ public class CustomEmbeddingModel {
     log.debugf("Finished embedding %s text segments", segments.size());
 
     return new EmbeddingBatch(getVectors(embeddingsResponse), getSerializableTextSegment(segments),
-        new SerializableTokenUsage(embeddingsResponse.tokenUsage()));
+        new TokenUsage(embeddingsResponse.tokenUsage()));
   }
 
-  private List<SerializableTextSegment> getSerializableTextSegment(List<TextSegment> segments) {
+  private List<TextSegment> getSerializableTextSegment(
+      List<dev.langchain4j.data.segment.TextSegment> segments) {
     return segments.stream()
-        .map(segment -> new SerializableTextSegment(
+        .map(segment -> new TextSegment(
             segment.text(),
             segment.metadata().toMap()))
         .toList();

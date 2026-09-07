@@ -7,13 +7,13 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.streamx.blueprints.data.Data;
+import com.streamx.blueprints.data.Resource;
+import com.streamx.hub.rag.data.EmbeddingBatch;
 import com.streamx.hub.rag.embed.EmbeddingProducerIT.IntegrationTestProfile;
 import com.streamx.hub.rag.embed.commons.BaseQuarkusIntegrationTest;
 import com.streamx.hub.rag.embed.commons.BaseQuarkusIntegrationTestProfile;
-import com.streamx.hub.rag.embed.data.Data;
-import com.streamx.hub.rag.embed.data.EmbeddingBatch;
-import com.streamx.hub.rag.embed.data.Resource;
-import com.streamx.hub.rag.embed.utils.CloudEventUtils;
+import com.streamx.hub.rag.utils.CloudEventUtils;
 import io.cloudevents.CloudEvent;
 import io.quarkus.test.junit.QuarkusIntegrationTest;
 import io.quarkus.test.junit.TestProfile;
@@ -93,7 +93,7 @@ public class EmbeddingProducerIT extends BaseQuarkusIntegrationTest {
 
     EmbeddingBatch embeddingBatch = getEmbeddingBatch(outgoingEvent);
     assertThat(embeddingBatch.vectors()).hasSize(1);
-    assertThat(embeddingBatch.serializableTokenUsage().totalTokenCount()).isEqualTo(-1);
+    assertThat(embeddingBatch.tokenUsage().totalTokenCount()).isEqualTo(-1);
     assertThat(embeddingBatch.embedded().get(1).toString()).contains(
         "\"discountedValue\": \"8.52\"\n}\n}");
   }

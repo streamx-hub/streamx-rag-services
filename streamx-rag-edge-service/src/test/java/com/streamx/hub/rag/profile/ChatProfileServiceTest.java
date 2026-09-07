@@ -2,7 +2,6 @@ package com.streamx.hub.rag.profile;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.quarkus.test.TestTransaction;
@@ -52,53 +51,12 @@ class ChatProfileServiceTest {
 
   @Test
   @TestTransaction
-  void shouldCreateProfile() {
-    ChatProfileRequest request = new ChatProfileRequest(
-        "support",
-        "Support Assistant",
-        "Answer support questions",
-        10,
-        0.7,
-        "billing,password",
-        true
-    );
-
-    ChatProfile created = service.create(request);
-
-    assertNotNull(created);
-    assertEquals("support", created.name);
-    assertEquals("Support Assistant", created.displayName);
-    assertEquals(10, created.maxResults);
-    assertEquals(0.7, created.minScore);
-    assertEquals("billing,password", created.topicBlocklist);
-  }
-
-  @Test
-  @TestTransaction
-  void shouldRejectDuplicateProfileCreation() {
-    ChatProfileRequest request = new ChatProfileRequest(
-        "duplicate",
-        "One",
-        "Prompt",
-        5,
-        0.5,
-        null,
-        true
-    );
-
-    service.create(request);
-
-    assertThrows(IllegalArgumentException.class, () -> service.create(request));
-  }
-
-  @Test
-  @TestTransaction
-  void shouldFallbackToDefaultProfileWhenMissing() {
+  void shouldFallbackToConfigProfileWhenMissing() {
     service.seedDefaultProfile();
-    ChatProfile resolved = service.resolveOrDefault("does-not-exist");
+    ChatProfile resolved = service.getProfileOrDefault("does-not-exist");
 
     assertEquals(
-        ChatProfileService.DEFAULT_PROFILE_NAME,
+        "environment",
         resolved.name
     );
   }
@@ -115,9 +73,9 @@ class ChatProfileServiceTest {
     inactive.active = false;
     inactive.persist();
 
-    ChatProfile resolved = service.resolveOrDefault("inactive");
+    ChatProfile resolved = service.getProfileOrDefault("inactive");
 
-    assertEquals(ChatProfileService.DEFAULT_PROFILE_NAME, resolved.name);
+    assertEquals("environment", resolved.name);
   }
 
   @Test

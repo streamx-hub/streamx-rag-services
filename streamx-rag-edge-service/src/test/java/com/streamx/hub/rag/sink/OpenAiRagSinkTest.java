@@ -7,8 +7,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.streamx.blueprints.data.Resource;
 import com.streamx.hub.rag.Channels;
-import com.streamx.hub.rag.data.Resource;
 import com.streamx.hub.rag.utils.CloudEventUtils;
 import com.streamx.hub.rag.utils.PathUtils;
 import dev.langchain4j.store.embedding.EmbeddingStore;

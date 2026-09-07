@@ -6,15 +6,15 @@ import static com.streamx.hub.rag.utils.PathUtils.getPathFrom;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.streamx.blueprints.data.Resource;
 import com.streamx.hub.rag.Channels;
 import com.streamx.hub.rag.Configuration;
 import com.streamx.hub.rag.data.EmbeddingBatch;
-import com.streamx.hub.rag.data.Resource;
-import com.streamx.hub.rag.data.SerializableTextSegment;
+import com.streamx.hub.rag.data.TextSegment;
 import com.streamx.hub.rag.utils.CloudEventUtils;
 import dev.langchain4j.data.document.Metadata;
 import dev.langchain4j.data.embedding.Embedding;
-import dev.langchain4j.data.segment.TextSegment;
+import dev.langchain4j.model.output.TokenUsage;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.IngestionResult;
 import dev.langchain4j.store.embedding.filter.MetadataFilterBuilder;
@@ -25,7 +25,6 @@ import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -52,12 +51,12 @@ public class OpenAiRagSink {
   Configuration config;
 
   @Inject
-  EmbeddingStore<TextSegment> embeddingStore;
+  EmbeddingStore<dev.langchain4j.data.segment.TextSegment> embeddingStore;
 
   @PostConstruct
   void init() {
-    this.htmlResourceTypes = config.htmlResourceTypes().orElseGet(Collections::emptySet);
-    this.defaultNamespace = config.defaultNamespace().orElse("");
+    this.htmlResourceTypes = config.htmlResourceTypes();
+    this.defaultNamespace = config.defaultNamespace();
     this.embeddingStore = Optional.ofNullable(embeddingStore)
         .orElseThrow(() -> new IllegalArgumentException("embeddingStore cannot be null"));
   }
@@ -65,13 +64,8 @@ public class OpenAiRagSink {
   @Incoming(Channels.EMBEDDINGS)
   public Uni<Void> consume(CloudEvent event) {
     String subject = CloudEventUtils.getSubject(event);
-    Resource resource;
-    try {
-      resource = CloudEventUtils.getDataSkippingUnknownProperties(event, Resource.class);
-    } catch (IllegalStateException e) {
-      log.warnf(e, "Unsupported event: subject %s, type %s", subject, event.getType());
-      return Uni.createFrom().voidItem();
-    }
+    Resource resource = CloudEventUtils.getDataSkippingUnknownProperties(event, Resource.class);
+
     return Optional.ofNullable(resource)
         .map(res -> getEmbeddingBatch(resource.getContentAsBytes()))
         .map(batch -> process(
@@ -119,7 +113,7 @@ public class OpenAiRagSink {
 
   public IngestionResult ingest(EmbeddingBatch embeddingBatch) {
     if (embeddingBatch.embedded() == null) {
-      return null;
+      return new IngestionResult(new TokenUsage(0));
     }
     log.debugf("Starting to store %s text segments into the embedding store",
         embeddingBatch.embedded().size());
@@ -127,12 +121,13 @@ public class OpenAiRagSink {
         getTextSegments(embeddingBatch.embedded()));
     log.debugf("Finished storing %s text segments into the embedding store",
         embeddingBatch.embedded().size());
-    return new IngestionResult(embeddingBatch.serializableTokenUsage().getTokenUsage());
+    return new IngestionResult(new TokenUsage(embeddingBatch.tokenUsage().inputTokenCount()));
   }
 
-  private static List<TextSegment> getTextSegments(List<SerializableTextSegment> embedded) {
+  private static List<dev.langchain4j.data.segment.TextSegment> getTextSegments(
+      List<TextSegment> embedded) {
     return embedded.stream()
-        .map(segment -> new TextSegment(segment.text(),
+        .map(segment -> new dev.langchain4j.data.segment.TextSegment(segment.text(),
             new Metadata(segment.metadata())))
         .toList();
   }
@@ -144,13 +139,8 @@ public class OpenAiRagSink {
   }
 
   private void removeByUrl(String url) {
-    try {
-      embeddingStore.removeAll(
-          MetadataFilterBuilder.metadataKey(META_SOURCE_URL)
-              .isEqualTo(url));
-    } catch (Exception e) {
-      log.debugf("removeAll by source_url not supported or no vectors found for %s: %s",
-          url, e.getMessage());
-    }
+    embeddingStore.removeAll(
+        MetadataFilterBuilder.metadataKey(META_SOURCE_URL)
+            .isEqualTo(url));
   }
 }

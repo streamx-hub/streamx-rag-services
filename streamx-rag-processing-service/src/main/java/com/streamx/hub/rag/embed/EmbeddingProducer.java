@@ -1,15 +1,15 @@
 package com.streamx.hub.rag.embed;
 
-import static com.streamx.hub.rag.embed.utils.CloudEventUtils.isPublishingType;
-import static com.streamx.hub.rag.embed.utils.CloudEventUtils.isUnpublishingType;
+import static com.streamx.hub.rag.utils.CloudEventUtils.isPublishingType;
+import static com.streamx.hub.rag.utils.CloudEventUtils.isUnpublishingType;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.streamx.hub.rag.embed.data.Data;
-import com.streamx.hub.rag.embed.data.EmbeddingBatch;
-import com.streamx.hub.rag.embed.data.Resource;
-import com.streamx.hub.rag.embed.utils.CloudEventUtils;
+import com.streamx.blueprints.data.Data;
+import com.streamx.blueprints.data.Resource;
+import com.streamx.hub.rag.data.EmbeddingBatch;
+import com.streamx.hub.rag.utils.CloudEventUtils;
 import dev.langchain4j.data.document.Document;
 import dev.langchain4j.data.document.Metadata;
 import dev.langchain4j.data.document.splitter.DocumentSplitters;

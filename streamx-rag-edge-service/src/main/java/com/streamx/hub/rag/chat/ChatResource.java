@@ -63,7 +63,7 @@ public class ChatResource {
 
     // Resolve the profile for this request and make it available to the
     // retrieval augmentor (maxResults, minScore) via the @RequestScoped ActiveProfile bean.
-    ChatProfile profile = profileService.resolveOrDefault(request.profileName());
+    ChatProfile profile = profileService.getProfileOrDefault(request.profileName());
     String systemPrompt = SystemPrompt.build(profile);
 
     String sessionId = getSessionId(request);

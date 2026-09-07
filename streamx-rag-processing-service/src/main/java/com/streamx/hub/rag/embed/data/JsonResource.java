@@ -2,6 +2,7 @@ package com.streamx.hub.rag.embed.data;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.streamx.blueprints.data.Resource;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import java.nio.ByteBuffer;
 

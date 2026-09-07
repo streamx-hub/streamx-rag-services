@@ -1,4 +1,4 @@
-package com.streamx.hub.rag.embed.utils;
+package com.streamx.hub.rag.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -21,9 +21,7 @@ import org.eclipse.microprofile.config.ConfigProvider;
 public class CloudEventUtils {
 
   private static final String NAMESPACE_SEPARATOR = ":";
-
   private static final String PUBLISH_TYPE_SEARCH_TERM = ".published.";
-
   private static final String UNPUBLISH_TYPE_SEARCH_TERM = ".unpublished.";
 
   private static final Config config = ConfigProvider.getConfig();

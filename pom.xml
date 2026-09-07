@@ -11,6 +11,7 @@
   <modules>
     <module>streamx-rag-edge-service</module>
     <module>streamx-rag-processing-service</module>
+    <module>libraries</module>
   </modules>
 
   <scm>
@@ -40,6 +41,7 @@
 
     <!--  StreamX  -->
     <streamx.version>2.0.9</streamx.version>
+    <streamx.blueprints.version>3.0.22</streamx.blueprints.version>
 
     <!-- CloudEvents -->
     <cloudevents-impl.version>4.0.1</cloudevents-impl.version>
@@ -137,6 +139,17 @@
         <artifactId>rocksdbjni</artifactId>
         <version>${rocks-db.version}</version>
       </dependency>
+      <dependency>
+        <groupId>com.streamx.hub</groupId>
+        <artifactId>data-model</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.quarkus</groupId>
+        <artifactId>quarkus-container-image-docker</artifactId>
+        <version>${quarkus.platform.version}</version>
+        <scope>runtime</scope>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -148,6 +161,11 @@
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.streamx.blueprints</groupId>
+      <artifactId>data-model</artifactId>
+      <version>${streamx.blueprints.version}</version>
     </dependency>
 
     <!-- LangChain4j OpenAI (chat + embedding) -->
@@ -175,11 +193,6 @@
     <dependency>
       <groupId>com.streamx</groupId>
       <artifactId>reactive-messaging-http-cloudevents</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-container-image-docker</artifactId>
-      <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>

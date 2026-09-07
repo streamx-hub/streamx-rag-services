@@ -6,8 +6,8 @@ import java.util.List;
 @RegisterForReflection
 public record EmbeddingBatch(
     List<float[]> vectors,
-    List<SerializableTextSegment> embedded,
-    SerializableTokenUsage serializableTokenUsage
+    List<TextSegment> embedded,
+    TokenUsage tokenUsage
 ) {
 
 }
