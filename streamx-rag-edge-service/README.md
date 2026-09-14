@@ -7,11 +7,12 @@ The **OpenAiRagSink** consumes **embed-events** channel and stores embeddings in
 
 ### variables
 | Variable                                                 | Required    | Default   | Description                   |
-| -------------------------------------------------------- | ----------- | --------- | ----------------------------- |
+|----------------------------------------------------------| ----------- | --------- |-------------------------------|
 | `STREAMX_OPENAI_API_KEY`                                 | ✅ always    | —         | OpenAI API key                |
+| `POSTGRES_USER`                                          | ✅ always    | —         | PostgeSQL db user             |
+| `POSTGRES_PASSWORD`                                      | ✅ always    | —         | PostgeSQL db user password    |
 | `streamx.hub.openai-rag-sink.chat-profile.name`          | ✅ always    | `default` | Chat profile environment name |
 | `streamx.hub.openai-rag-sink.chat-profile.system-prompt` | ✅ always    | —         | Chat profile system prompt    |
-| `streamx.hub.openai-rag-sink.chat-profile.active`        | ✅ always    | —         | Chat profile activation flag  |
 | `streamx.hub.openai-rag-sink.chat-profile.display-name`  | recommended | —         | Chat profile display name     |
 
 ### Example endpoint call

@@ -1,5 +1,6 @@
 package com.streamx.hub.rag.retrieval;
 
+import com.streamx.hub.rag.Configuration;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.rag.query.Query;
 import dev.langchain4j.rag.query.transformer.QueryTransformer;
@@ -59,6 +60,9 @@ public class TranslatingQueryTransformer implements QueryTransformer {
   @Inject
   ContextualizingAiService contextualizingService;
 
+  @Inject
+  Configuration config;
+
   @Override
   public Collection<Query> transform(Query query) {
     String queryText = query.text();
@@ -76,7 +80,8 @@ public class TranslatingQueryTransformer implements QueryTransformer {
 
   private @NonNull List<Query> translate(Query query, String queryText) {
     try {
-      String translated = translationService.translate(queryText).trim();
+      String translated = translationService.translate(config.translationPrompt(), queryText)
+          .trim();
       if (!translated.isBlank() && !translated.equalsIgnoreCase(queryText)) {
         LOG.debugf("Translated: [%s] → [%s]", queryText, translated);
       }
@@ -90,7 +95,7 @@ public class TranslatingQueryTransformer implements QueryTransformer {
   private @NonNull String contextualize(Query query, String queryText) {
     List<ChatMessage> history = query.metadata().chatMemory();
     if (history != null && !history.isEmpty()) {
-      String contextualized = contextualizingService.contextualize(
+      String contextualized = contextualizingService.contextualize(config.contextualizationPrompt(),
               formatHistory(history),
               queryText)
           .trim();

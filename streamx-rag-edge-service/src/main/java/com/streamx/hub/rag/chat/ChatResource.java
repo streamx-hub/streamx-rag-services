@@ -1,7 +1,7 @@
 package com.streamx.hub.rag.chat;
 
+import com.streamx.hub.rag.Configuration;
 import com.streamx.hub.rag.profile.ChatProfile;
-import com.streamx.hub.rag.profile.ChatProfileService;
 import com.streamx.hub.rag.profile.SystemPrompt;
 import io.smallrye.common.annotation.Blocking;
 import io.smallrye.mutiny.Multi;
@@ -18,23 +18,18 @@ import org.jboss.resteasy.reactive.RestStreamElementType;
 /**
  * Chat endpoint. Streams GPT-4o responses token by token.
  *
- * <p>Callers may optionally pass a {@code profileName} in the request body to
- * select a specific business use-case configuration. Omitting it (or sending {@code "default"})
- * uses the default assistant behaviour.
- *
  */
 @Path("/api/chat")
 public class ChatResource {
 
   private static final Logger LOG = Logger.getLogger(ChatResource.class);
   private static final String FALLBACK_MSG =
-      "I'm having trouble reaching the AI service right now. "
-          + "Please wait a moment and try again.";
+      "Sorry, I’m having a little trouble right now. Please give it another try in a moment.";
 
   @Inject
   ChatAiService chatService;
   @Inject
-  ChatProfileService profileService;
+  Configuration config;
 
   /**
    * Chat endpoint.
@@ -47,7 +42,6 @@ public class ChatResource {
    * {
    *   "question":    "Show me a grey corner sofa under £1500",
    *   "sessionId":   "abc-123",          // optional — auto-generated if absent
-   *   "profileName": "customer-support"  // optional — defaults to "default"
    * }
    * }</pre>
    */
@@ -61,9 +55,7 @@ public class ChatResource {
       return Multi.createFrom().item("Please enter a question.");
     }
 
-    // Resolve the profile for this request and make it available to the
-    // retrieval augmentor (maxResults, minScore) via the @RequestScoped ActiveProfile bean.
-    ChatProfile profile = profileService.getProfileOrDefault(request.profileName());
+    ChatProfile profile = getProfile();
     String systemPrompt = SystemPrompt.build(profile);
 
     String sessionId = getSessionId(request);
@@ -71,7 +63,7 @@ public class ChatResource {
 
     return chatService.chat(sessionId, systemPrompt, request.question())
         .onFailure().recoverWithMulti(t -> {
-          LOG.errorf(t, "Chat stream error for session %s", sessionId);
+          LOG.warnf(t, "Chat stream error for session %s", sessionId);
           return Multi.createFrom().item(FALLBACK_MSG);
         });
   }
@@ -80,6 +72,14 @@ public class ChatResource {
     return (request.sessionId() != null && !request.sessionId().isBlank())
         ? request.sessionId()
         : UUID.randomUUID().toString();
+  }
+
+  private ChatProfile getProfile() {
+    Configuration.ChatProfile profileConfig = config.chatProfile();
+    return ChatProfile.create(
+        profileConfig.name(),
+        profileConfig.displayName(),
+        profileConfig.systemPrompt());
   }
 
   /**

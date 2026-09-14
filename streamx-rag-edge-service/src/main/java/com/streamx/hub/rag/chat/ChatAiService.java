@@ -14,8 +14,7 @@ public interface ChatAiService {
   /**
    * Streams a GPT-4o response for the given question.
    *
-   * <p>The system prompt is supplied dynamically from the active chat profile,
-   * allowing behaviour to be changed at runtime without redeploying the service.
+   * <p>The system prompt is supplied dynamically from the active chat profile.
    *
    * @param sessionId    conversation memory key (one memory per session)
    * @param systemPrompt full system prompt for the active profile (with guardrails appended)

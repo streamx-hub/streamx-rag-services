@@ -23,8 +23,6 @@ import jakarta.inject.Inject;
 import java.time.Duration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 
 @QuarkusTest
@@ -69,7 +67,7 @@ public class OpenAiRagSinkTest {
             }
           }
         ],
-        "serializableTokenUsage": {
+        "tokenUsage": {
           "inputTokenCount": -1,
           "outputTokenCount": -1,
           "totalTokenCount": -1
@@ -135,23 +133,8 @@ public class OpenAiRagSinkTest {
 
   @Test
   void shouldReturnPathWhenIsNotHtmlResource() {
-    String path = PathUtils.getPathFrom("test", false, "default");
+    String path = PathUtils.getPathFrom("test", "default");
 
     assertThat(path).isEqualTo("default/test");
-  }
-
-  @CsvSource(delimiterString = "->", textBlock = """
-      c.html     ->  c.html
-      a/b/c.html ->  a/b/c.html
-      c          ->  c/index.html
-      a/b/c      ->  a/b/c/index.html
-      a/b/c/     ->  a/b/c/index.html
-      /          ->  /index.html
-      ''         ->  /index.html
-      """)
-  @ParameterizedTest
-  void shouldComputeHtmlResourcePath(String inputPath, String expectedResult) {
-    String actualResult = PathUtils.computeHtmlResourcePath(inputPath);
-    assertThat(actualResult).isEqualTo(expectedResult);
   }
 }

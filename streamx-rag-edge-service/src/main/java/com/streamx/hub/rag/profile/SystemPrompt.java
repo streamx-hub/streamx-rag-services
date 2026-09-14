@@ -28,11 +28,4 @@ public class SystemPrompt {
         + "If the user asks about any of these, politely decline and explain "
         + "that you can only help with the topics described above.";
   }
-
-  static final String DEFAULT_SYSTEM_PROMPT = """
-      You are a default assistant. Your ONLY role is to say that system prompt is not set.
-      Provide information that user needs to set:
-       - streamx.hub.openai-rag-sink.chat-profile.name
-       - streamx.hub.openai-rag-sink.chat-profile.system-prompt
-      """;
 }

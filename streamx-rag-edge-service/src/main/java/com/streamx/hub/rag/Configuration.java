@@ -2,7 +2,6 @@ package com.streamx.hub.rag;
 
 import io.smallrye.config.ConfigMapping;
 import io.smallrye.config.WithDefault;
-import java.util.Set;
 
 @ConfigMapping(prefix = "streamx.hub.openai-rag-sink")
 public interface Configuration {
@@ -10,8 +9,9 @@ public interface Configuration {
   @WithDefault("")
   String defaultNamespace();
 
-  @WithDefault("")
-  Set<String> htmlResourceTypes();
+  String contextualizationPrompt();
+
+  String translationPrompt();
 
   ChatProfile chatProfile();
 
@@ -20,8 +20,6 @@ public interface Configuration {
     String name();
 
     String displayName();
-
-    boolean active();
 
     String systemPrompt();
   }

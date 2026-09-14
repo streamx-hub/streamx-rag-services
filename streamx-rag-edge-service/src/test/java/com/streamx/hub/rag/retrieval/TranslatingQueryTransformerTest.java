@@ -13,6 +13,7 @@ import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import java.util.Collection;
 import java.util.List;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.junit.jupiter.api.Test;
 
 @QuarkusTest
@@ -27,9 +28,13 @@ public class TranslatingQueryTransformerTest {
   @InjectMock
   ContextualizingAiService contextualizingService;
 
+  @ConfigProperty(name = "streamx.hub.openai-rag-sink.translation-prompt")
+  String translationPrompt;
+
   @Test
   void shouldTranslatePolishQueryToEnglish() {
-    when(translationService.translate("najtanszy stol")).thenReturn("cheapest table");
+    when(translationService.translate(translationPrompt, "najtanszy stol")).thenReturn(
+        "cheapest table");
 
     Collection<Query> result = transformer.transform(
         Query.from("najtanszy stol", mock(Metadata.class)));
@@ -40,7 +45,7 @@ public class TranslatingQueryTransformerTest {
 
   @Test
   void shouldReturnOriginalOnTranslationFailure() {
-    when(translationService.translate(anyString()))
+    when(translationService.translate(anyString(), anyString()))
         .thenThrow(new RuntimeException("OpenAI error"));
 
     Collection<Query> result = transformer.transform(
@@ -52,9 +57,9 @@ public class TranslatingQueryTransformerTest {
 
   @Test
   void shouldContextualizeVaguePronounQuery() {
-    when(contextualizingService.contextualize(anyString(), anyString()))
+    when(contextualizingService.contextualize(anyString(), anyString(), anyString()))
         .thenReturn("dimensions of Scandinavian Sofa");
-    when(translationService.translate("dimensions of Scandinavian Sofa"))
+    when(translationService.translate(translationPrompt, "dimensions of Scandinavian Sofa"))
         .thenReturn("dimensions of Scandinavian Sofa");
     Metadata metadata = mock(Metadata.class);
     when(metadata.chatMemory()).thenReturn(List.of(UserMessage.from("hello")));
@@ -68,7 +73,8 @@ public class TranslatingQueryTransformerTest {
 
   @Test
   void shouldNotContextualizeSelfContainedQuery() {
-    when(translationService.translate("cheapest lamp")).thenReturn("cheapest lamp");
+    when(translationService.translate(translationPrompt, "cheapest lamp")).thenReturn(
+        "cheapest lamp");
 
     Collection<Query> result = transformer.transform(
         Query.from("cheapest lamp", mock(Metadata.class)));

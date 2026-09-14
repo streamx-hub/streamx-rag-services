@@ -19,11 +19,8 @@ import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.time.OffsetDateTime;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
-import org.apache.commons.io.FilenameUtils;
 import org.eclipse.microprofile.reactive.messaging.Incoming;
 import org.eclipse.microprofile.reactive.messaging.Outgoing;
 import org.jboss.logging.Logger;
@@ -32,12 +29,10 @@ import org.jboss.logging.Logger;
 public class EmbeddingProducer {
 
   private static final String META_SOURCE_URL = "source_url";
-  private static final String INDEX_HTML_SUFFIX = "index.html";
   private static final ObjectMapper objectMapper = new ObjectMapper().configure(
       DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false
   );
 
-  private Set<String> htmlResourceTypes;
   private String defaultNamespace;
 
   @Inject
@@ -51,7 +46,6 @@ public class EmbeddingProducer {
 
   @PostConstruct
   void init() {
-    this.htmlResourceTypes = config.htmlResourceTypes().orElseGet(Collections::emptySet);
     this.defaultNamespace = config.defaultNamespace().orElse("");
   }
 
@@ -72,11 +66,9 @@ public class EmbeddingProducer {
   private CloudEvent process(Resource resource, String subject, CloudEvent event) {
     String type = event.getType();
     OffsetDateTime eventTime = event.getTime();
-    boolean isHtmlResource = htmlResourceTypes.contains(type);
-    String path = getPathFrom(subject, isHtmlResource);
-    log.tracef("Storing %s resource: subject %s, type %s, event time %s under path %s",
-        (isHtmlResource ? "HTML" : "non-HTML"), subject, type,
-        Objects.requireNonNull(eventTime).toInstant().toEpochMilli(), path);
+    String path = getPathFrom(subject);
+    log.tracef("Storing resource: subject %s, type %s, event time %s under path %s",
+        subject, type, Objects.requireNonNull(eventTime).toInstant().toEpochMilli(), path);
 
     if (isPublishingType(type)) {
       return embed(resource, path, subject, eventTime);
@@ -101,20 +93,9 @@ public class EmbeddingProducer {
     }
   }
 
-  private String getPathFrom(String subject, boolean isHtmlResource) {
+  private String getPathFrom(String subject) {
     String namespace = CloudEventUtils.getSubjectNamespace(subject).orElse(defaultNamespace);
-    String path = namespace + "/" + CloudEventUtils.getSubjectWithoutNamespace(subject);
-    return isHtmlResource ? computeHtmlResourcePath(path) : path;
-  }
-
-  static String computeHtmlResourcePath(String path) {
-    if (path.endsWith("/")) {
-      return path + INDEX_HTML_SUFFIX;
-    }
-    if (FilenameUtils.getExtension(path).isEmpty()) {
-      return path + "/" + INDEX_HTML_SUFFIX;
-    }
-    return path;
+    return namespace + "/" + CloudEventUtils.getSubjectWithoutNamespace(subject);
   }
 
   private CustomEmbeddingModel buildModel() {

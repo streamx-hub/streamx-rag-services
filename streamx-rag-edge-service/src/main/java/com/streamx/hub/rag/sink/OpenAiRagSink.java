@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import org.eclipse.microprofile.reactive.messaging.Incoming;
 import org.jboss.logging.Logger;
 
@@ -41,7 +40,6 @@ public class OpenAiRagSink {
       DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false
   );
 
-  private Set<String> htmlResourceTypes;
   private String defaultNamespace;
 
   @Inject
@@ -55,7 +53,6 @@ public class OpenAiRagSink {
 
   @PostConstruct
   void init() {
-    this.htmlResourceTypes = config.htmlResourceTypes();
     this.defaultNamespace = config.defaultNamespace();
     this.embeddingStore = Optional.ofNullable(embeddingStore)
         .orElseThrow(() -> new IllegalArgumentException("embeddingStore cannot be null"));
@@ -87,10 +84,9 @@ public class OpenAiRagSink {
 
   private Uni<Void> process(EmbeddingBatch embeddingBatch, String subject, String type,
       long eventTime) {
-    boolean isHtmlResource = htmlResourceTypes.contains(type);
-    String path = getPathFrom(subject, isHtmlResource, defaultNamespace);
-    log.tracef("Storing %s resource: subject %s, type %s, event time %s under path %s",
-        (isHtmlResource ? "HTML" : "non-HTML"), subject, type, eventTime, path);
+    String path = getPathFrom(subject, defaultNamespace);
+    log.tracef("Storing resource: subject %s, type %s, event time %s under path %s",
+        subject, type, eventTime, path);
     return updateStorage(embeddingBatch, path, type);
   }
 

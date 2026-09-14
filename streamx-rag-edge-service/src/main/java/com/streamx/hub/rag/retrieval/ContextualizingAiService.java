@@ -14,19 +14,7 @@ import io.quarkiverse.langchain4j.RegisterAiService;
 @RegisterAiService
 public interface ContextualizingAiService {
 
-  @SystemMessage("""
-      You help rewrite vague product search queries to be self-contained.
-      Given a short conversation history and the user's latest question,
-      rewrite the question so it can be understood without the conversation context.
-      
-      Rules:
-      - Return ONLY the rewritten question — no explanations or extra text.
-      - Replace pronouns (it, its, this, that, they, them, those, the one, the same)
-        with the specific product name or attribute they refer to from the history.
-      - If the question is already self-contained (no ambiguous references), return it UNCHANGED.
-      - Keep the same language as the input question.
-      - Keep product names, SKUs and numbers exactly as-is.
-      """)
+  @SystemMessage("{contextualizationPrompt}")
   @UserMessage("Conversation history (last messages):\n{history}\n\nLatest question: {question}")
-  String contextualize(String history, String question);
+  String contextualize(String contextualizationPrompt, String history, String question);
 }
