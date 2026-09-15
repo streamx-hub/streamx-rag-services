@@ -4,12 +4,10 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-import static com.streamx.hub.rag.embed.commons.JsonFormatter.formatJson;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import io.cloudevents.CloudEvent;
@@ -19,10 +17,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.regex.Pattern;
 import org.awaitility.core.ConditionTimeoutException;
-import org.eclipse.microprofile.config.ConfigProvider;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -49,26 +44,10 @@ public abstract class BaseQuarkusIntegrationTest {
     }
   }
 
-  protected static void sendStatefulEvent(CloudEvent event, String stateChannel,
-      String mainChannel) {
-    sendEvent(event, stateChannel);
-    sendEvent(event, mainChannel);
-  }
-
   protected static void sendEvent(CloudEvent cloudEvent, String channel) {
     String serializedEvent = CloudEventsSerialization.serialize(cloudEvent);
     String url = toUrl(channel);
     HttpRequestor.post(url, serializedEvent);
-  }
-
-  /**
-   * Some services are configured in the mesh file to use the same ref for outgoing and incoming
-   * channels. Since QuarkusIntegrationTests don't use a mesh file, this method can be used to
-   * manually simulate that behavior
-   */
-  protected void sendFromOutgoingToIncomingChannel(String outgoing, String incoming) {
-    CloudEvent outgoingEvent = waitForResponseEvent(outgoing);
-    sendEvent(outgoingEvent, incoming);
   }
 
   protected CloudEvent waitForResponseEvent(String outgoingChannel) {
@@ -97,7 +76,6 @@ public abstract class BaseQuarkusIntegrationTest {
         results.addAll(requests);
       });
     } catch (ConditionTimeoutException ex) {
-      DockerLogsRetriever.printDockerContainerLogs();
       return fail(ex);
     }
     return results;
@@ -105,33 +83,6 @@ public abstract class BaseQuarkusIntegrationTest {
 
   protected Duration waitForResponseEventsTimeout() {
     return Duration.ofSeconds(3);
-  }
-
-  protected String getUrlContent(String url) {
-    AtomicReference<String> content = new AtomicReference<>();
-    await().atMost(waitForResponseEventsTimeout()).untilAsserted(() ->
-        content.set(HttpRequestor.getUrlContent(url))
-    );
-    return content.get();
-  }
-
-  protected static void assertSameJsons(String actual, String expected) {
-    assertThat(formatJson(actual)).isEqualTo(formatJson(expected));
-  }
-
-  protected static void assertSameJsons(JsonNode actualNode, String expected,
-      Pattern... patternsToRemove) {
-    String actualJson = formatJson(actualNode);
-    String expectedJson = formatJson(expected);
-    for (Pattern pattern : patternsToRemove) {
-      actualJson = removePattern(actualJson, pattern);
-      expectedJson = removePattern(expectedJson, pattern);
-    }
-    assertThat(actualJson).isEqualTo(expectedJson);
-  }
-
-  private static String removePattern(String string, Pattern pattern) {
-    return pattern.matcher(string).replaceAll("");
   }
 
   static Map<String, String> propertiesForOutgoingChannels() {
@@ -163,10 +114,5 @@ public abstract class BaseQuarkusIntegrationTest {
     } else {
       return "host.docker.internal";
     }
-  }
-
-  protected static int getWiremockPort() {
-    return ConfigProvider.getConfig()
-        .getValue("quarkus.wiremock.devservices.port", Integer.class);
   }
 }

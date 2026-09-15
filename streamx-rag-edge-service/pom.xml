@@ -23,12 +23,6 @@
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-jdbc-postgresql</artifactId>
     </dependency>
-    <!-- Hibernate ORM + Panache for chat profile management -->
-    <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-hibernate-orm-panache</artifactId>
-      <version>3.31.1</version>
-    </dependency>
 
     <dependency>
       <groupId>io.quarkus</groupId>
