@@ -4,7 +4,7 @@
 
   <groupId>com.streamx.hub</groupId>
   <artifactId>streamx-rag-service</artifactId>
-  <version>1.0.2</version>
+  <version>1.0.3-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>StreamX RAG : Project</name>
 
@@ -18,7 +18,7 @@
     <connection>scm:git:git@github.com:streamx-hub/streamx-rag-edge-service.git</connection>
     <developerConnection>scm:git:git@github.com:streamx-hub/streamx-rag-edge-service.git
     </developerConnection>
-    <tag>1.0.2</tag>
+    <tag>HEAD</tag>
     <url>https://github.com/streamx-hub/streamx-rag-edge-service.git</url>
   </scm>
 
