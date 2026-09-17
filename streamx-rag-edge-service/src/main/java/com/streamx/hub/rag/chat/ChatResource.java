@@ -71,7 +71,7 @@ public class ChatResource {
       );
       return mapper.readTree(stripMarkdown(response));
     } catch (Exception e) {
-      LOG.errorf(e, "Chat error for session %s", sessionId);
+      LOG.warnf(e, "Chat error for session %s", sessionId);
       return mapper.createObjectNode().put("message", FALLBACK_MSG);
     }
   }
